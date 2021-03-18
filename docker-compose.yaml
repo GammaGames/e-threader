@@ -1,0 +1,12 @@
+version: "3.3"
+
+services:
+  e-threader:
+    build: ./e-threader
+    volumes:
+      - ./e-threader:/opt/e-threader
+      - ./db.sqlite:/opt/db.sqlite
+    env_file:
+      - .env
+    ports:
+      - "80:80"
