@@ -1,0 +1,8 @@
+FROM python:3-slim-buster
+
+ADD requirements.txt /opt/requirements.txt
+
+RUN pip install -r /opt/requirements.txt
+
+# CMD ["./../godot", "--main-pack", "simple_server.pck", "-s"]
+CMD ["python", "/opt/e-threader/main.py"]
