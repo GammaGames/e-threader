@@ -16,7 +16,7 @@ async def send_mail(send_to, subject, text, files=None):
     print("Creating email...", flush=True)
 
     msg = MIMEMultipart()
-    msg["From"] = "ethreader.bot@gmail.com"
+    msg["From"] = GMAIL_USERNAME
     msg["To"] = COMMASPACE.join(send_to)
     msg["Date"] = formatdate(localtime=True)
     msg["Subject"] = subject
@@ -38,6 +38,6 @@ async def send_mail(send_to, subject, text, files=None):
     server.ehlo()
     server.login(GMAIL_USERNAME, GMAIL_PASSWORD)
     print("Sending email!", flush=True)
-    server.sendmail("ethreader.bot@gmail.com", send_to, msg.as_string())
+    server.sendmail(GMAIL_USERNAME, send_to, msg.as_string())
     server.close()
     print("Sent email!", flush=True)

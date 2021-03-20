@@ -12,34 +12,34 @@ async def create_book(meta, post, comments):
 
     book.add_author(meta["subreddit"])
 
-    intro = epub.EpubHtml(
-        title="Intro",
-        file_name="introduction.xhtml",
+    foreword = epub.EpubHtml(
+        title="Foreword",
+        file_name="foreword.xhtml",
         lang="en"
     )
-    intro.set_content(post)
-    book.add_item(intro)
+    foreword.set_content(post["body"])
+    book.add_item(foreword)
 
     chapters = []
     for comment in comments:
         chapter = epub.EpubHtml(
             title=comment["author"],
             file_name=f"{comment['author']}.xhtml",
-            # author=comment["author"],
             lang="en"
         )
         chapter.set_content(comment["body"])
         chapters.append(chapter)
         book.add_item(chapter)
+        book.add_author(comment["author"])
 
     book.toc = (
-        epub.Link("intro.xhtml", "Introduction", "intro"),
+        epub.Link("foreword.xhtml", "Foreword", "foreword"),
         (
-            epub.Section("Languages"),
+            epub.Section("Stories"),
             tuple(chapters)
         )
     )
-    book.spine = ["nav"] + chapters
+    book.spine = ["nav", foreword] + chapters
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())
 

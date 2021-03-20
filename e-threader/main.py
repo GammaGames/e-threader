@@ -1,17 +1,22 @@
 import discord
 import os
 import re
-import asyncio
 import reddit
 import ebook
 import mail
-from discord.channel import DMChannel
-from pony.orm import db_session
+from pony.orm import db_session, select
 from models import Guild, TextChannel, DmChannel, Message, User, Thread
 
 SIGNUP_CHANNEL = "sign-up"
+LOG_CHANNEL = "bot-log"
 SIGNUP_REACT = "🙋"
 CONFIRM_REACT = "✔️"
+SEEN_REACT = "👀"
+FETCHED_REACT = "⬆️"
+RENDERED_REACT = "📖"
+SENT_REACT = "📨"
+COMPLETE_REACT = "✔️"
+ERROR_REACT = "❌"
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 client = discord.Client()
 
@@ -19,6 +24,15 @@ _print = print
 
 def print(*args, **kwargs):
     _print(*args, flush=True, **kwargs)
+
+
+async def send_log(message):
+    print(message)
+    with db_session():
+        log_channels = select(c for c in TextChannel if c.name == LOG_CHANNEL)
+        for channel in log_channels:
+            lc = client.get_channel(channel.id)
+            await lc.send(message)
 
 
 def filter_user(user=None):
@@ -39,6 +53,7 @@ async def init_signup_message(c):
 
 
 async def init_signup(u):
+    await send_log(f"Signing up: {u.name}")
     with db_session():
         user = User[u.id]
 
@@ -50,6 +65,7 @@ async def init_signup(u):
 
 
 async def confirm_signup(u):
+    await send_log(f"Confirmed: {u.name}")
     with db_session():
         user = User[u.id]
 
@@ -66,12 +82,12 @@ async def process_dm(u, c, m):
         if not user.email and not text.startswith("?email"):
             await u.send("Please assign your email with `?email [YOUREMAIL@kindle.com]` first.")
             channel = await get_model(DmChannel, id=m.channel.id, user=user)
-            # Message(id=m.id, channel=channel, content=m.content)
         else:
             if text.startswith("?email"):
                 match = re.search(r"\?email\s+(?P<email>[^\s\"]+|\".*\")$", text)
                 if match is not None:
                     user.email = match.group("email")
+                    await send_log(f"Email set: {user.name}")
                     await u.send(f"""
 Signed up with email: "{user.email}"
 Please add us to your approved document email list:
@@ -93,29 +109,37 @@ Commands:
             if not text.startswith("?") or text.startswith("?thread"):
                 match = re.search(r"(?:\?thread\s+)?<?(?P<url>https:\/\/www.(?:old\.)?reddit\.com[^\s]+)>?$", text)
                 if match is not None:
-                    id = await reddit.get_post_id(match.group("url"))
-                    print("post:", id)
-                    # with open(f"/opt/e-threader/out/{id}.html", "w") as out_file:
+                    url = match.group("url")
+                    await m.add_reaction(SEEN_REACT)
+                    await send_log(f"Thread received: {user.name}, <{url}>")
+                    id = await reddit.get_post_id(url)
                     meta = await reddit.get_post(id)
                     post = await reddit.render_post(id)
                     comments = await reddit.render_comments(id)
+                    await m.add_reaction(FETCHED_REACT)
                     filename = await ebook.create_book(meta, post, comments)
+                    await m.add_reaction(RENDERED_REACT)
                     await mail.send_mail(
                         [user.email],
                         meta["title"],
                         "Here is your epub file!",
                         [filename]
                     )
-                        # out_file.write(rendered)
-
+                    await m.add_reaction(SENT_REACT)
+                    await m.add_reaction(COMPLETE_REACT)
+                    await send_log(f"Thread complete: {user.name}, <{url}>")
+                else:
+                    await m.add_reaction(ERROR_REACT)
+                    await send_log(f"Message error: {user.name}, >{text}")
 
 
 @client.event
 async def on_ready():
-    await reddit.setup()
+    await client.change_presence(status=discord.Status.online)
+    await send_log(f"Discord connected: {client.user}")
+    reddit_user = await reddit.setup()
+    await send_log(f"Reddit connected: {reddit_user}")
     with db_session():
-        global join_guild, join_channel, join_message
-        print("Discord login:", client.user)
         # print(client.private_channels)
         for g in client.guilds:
             guild = await get_model(Guild, id=g.id, name=g.name)
@@ -172,10 +196,10 @@ async def on_raw_reaction_add(payload):
             user = await get_model(User, id=u.id, name=u.name)
             react = payload.emoji.name
             # Signup actions
-            if react == SIGNUP_REACT and not user.email:
+            if react == SIGNUP_REACT and TextChannel.exists(id=payload.channel_id, name=SIGNUP_CHANNEL) and not user.email:
                 await init_signup(u)
-
-            elif react == CONFIRM_REACT:
+            # Signup confirmation
+            elif react == CONFIRM_REACT and DmChannel.exists(id=payload.channel_id, name=SIGNUP_CHANNEL):
                 await confirm_signup(u)
 
 

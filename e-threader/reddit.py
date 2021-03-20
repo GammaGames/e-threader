@@ -17,7 +17,7 @@ async def setup():
         user_agent="testing e-threader",
     )
     me = await reddit.user.me()
-    print("Reddit login:", me)
+    return me
 
 
 async def get_post_id(url):
@@ -41,10 +41,15 @@ async def render_post(id):
     global reddit
     template = env.get_template("post.html")
     submission = await reddit.submission(id=id)
-    return template.render(
-        title=submission.title,
-        body=markdown.markdown(submission.selftext)
-    )
+    return {
+        "submission": submission,
+        "author": submission.author.name,
+        "body": template.render(
+            author=submission.author.name,
+            title=submission.title,
+            body=markdown.markdown(submission.selftext)
+        )
+    }
 
 
 async def render_comments(id):
@@ -53,26 +58,14 @@ async def render_comments(id):
     submission = await reddit.submission(id=id)
     submission.comment_sort = "old"
     comments = await submission.comments()
-    # comments = [
-    #     {
-    #         "comment": c,
-    #         "author": c.author.name,
-    #         "body": markdown.markdown(c.body)
-    #     } for c in await comments.list()
-    #     if c.parent_id.startswith("t3")
-    # ]
-    # comments = [
-    #     c for c in submission.comments.list()
-    #     if c.parent_id.startswith("t3")
-    # ]
-    # return [r for r in comments]
     return [
         {
+            "comment": c,
             "author": c.author.name,
             "body": template.render(
                 author=c.author.name,
                 body=markdown.markdown(c.body)
             )
         } for c in await comments.list()
-        if c.parent_id.startswith("t3")
+        if c.parent_id.startswith("t3") and c.author.name != "AutoModerator"
     ]
