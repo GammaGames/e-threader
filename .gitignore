@@ -182,3 +182,5 @@ Thumbs.db #thumbnail cache on Windows
 
 .env
 db.sqlite
+*.epub
+*.mobi

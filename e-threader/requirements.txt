@@ -1,4 +1,6 @@
 discord.py
 EbookLib
 pony
-praw
+asyncpraw
+Markdown
+jinja2

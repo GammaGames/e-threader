@@ -1,0 +1,54 @@
+from ebooklib import epub
+import subprocess
+import re
+
+
+async def create_book(meta, post, comments):
+    book = epub.EpubBook()
+
+    book.set_identifier(meta["id"])
+    book.set_title(meta["title"])
+    book.set_language("en")
+
+    book.add_author(meta["subreddit"])
+
+    intro = epub.EpubHtml(
+        title="Intro",
+        file_name="introduction.xhtml",
+        lang="en"
+    )
+    intro.set_content(post)
+    book.add_item(intro)
+
+    chapters = []
+    for comment in comments:
+        chapter = epub.EpubHtml(
+            title=comment["author"],
+            file_name=f"{comment['author']}.xhtml",
+            # author=comment["author"],
+            lang="en"
+        )
+        chapter.set_content(comment["body"])
+        chapters.append(chapter)
+        book.add_item(chapter)
+
+    book.toc = (
+        epub.Link("intro.xhtml", "Introduction", "intro"),
+        (
+            epub.Section("Languages"),
+            tuple(chapters)
+        )
+    )
+    book.spine = ["nav"] + chapters
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    epub.write_epub(f"/var/tmp/{meta['id']}.epub", book)
+    safe_title = "".join([c for c in re.sub(r"\[\w+\]", "", meta["title"]) if c.isalpha() or c.isdigit() or c==' ']).strip()
+    subprocess.run([
+        "ebook-convert",
+        f"/var/tmp/{meta['id']}.epub",
+        f"opt/e-threader/out/{meta['id']}.mobi",
+        f"--title=\"{safe_title}\""
+    ])
+    return f"opt/e-threader/out/{meta['id']}.mobi"
