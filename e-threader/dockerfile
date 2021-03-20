@@ -3,7 +3,7 @@ FROM python:3-slim-buster
 ADD requirements.txt /opt/requirements.txt
 
 RUN apt-get update \
-    && apt-get install -y calibre \
+    && apt-get install -y calibre libxml2-dev libxslt-dev python-dev \
     && pip install -r /opt/requirements.txt
 
 # CMD ["python", "/opt/e-threader/main.py"]
