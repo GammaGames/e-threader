@@ -3,9 +3,7 @@ FROM python:3-slim-buster
 ADD requirements.txt /opt/requirements.txt
 
 RUN apt-get update \
-    && apt-get install -y xdg-utils wget xz-utils \
-    && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin \
+    && apt-get install -y calibre \
     && pip install -r /opt/requirements.txt
 
-# CMD ["./../godot", "--main-pack", "simple_server.pck", "-s"]
-CMD ["python", "/opt/e-threader/main.py"]
+# CMD ["python", "/opt/e-threader/main.py"]
