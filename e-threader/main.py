@@ -96,15 +96,21 @@ Please add us to your approved document email list:
 3. Enter "ethreader.bot@gmail.com"
 Commands:
     - `?email [EMAIL]`: Set user email
+    - `[LINK]`: Send reddit thread to your email as an e-book (default command)
     - `?thread [LINK]`: Send reddit thread to your email as an e-book
-    - `?help`: Print this text
+    - `?help`: Print help text
+
+To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/home/content/pdocs/dateDsc/
                     """)
             if text.startswith("?help"):
                     await u.send("""
 Commands:
     - `?email [EMAIL]`: Set user email
+    - `[LINK]`: Send reddit thread to your email as an e-book (default command)
     - `?thread [LINK]`: Send reddit thread to your email as an e-book
     - `?help`: Print this text
+
+To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/home/content/pdocs/dateDsc/
                     """)
             if not text.startswith("?") or text.startswith("?thread"):
                 match = re.search(r"(?:\?thread\s+)?<?(?P<url>https:\/\/www.(?:old\.)?reddit\.com[^\s]+)>?$", text)
