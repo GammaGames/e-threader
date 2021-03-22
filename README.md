@@ -8,3 +8,7 @@ TODO:
 * Add covers (from unsplash?)
 * Better logging
 * Add to pi
+
+
+touch db.sqlite
+mkdir e-threader/out
