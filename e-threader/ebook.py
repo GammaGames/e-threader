@@ -44,7 +44,7 @@ async def create_book(meta, post, comments):
     book.add_item(epub.EpubNav())
 
     epub.write_epub(f"/var/tmp/{meta['id']}.epub", book)
-    safe_title = "".join([c for c in re.sub(r"\[\w+\]", "", meta["title"]) if c.isalpha() or c.isdigit() or c==' ']).strip()
+    safe_title = re.sub(r"\[\w+\]", "", meta["title"]).strip()
     subprocess.run([
         "ebook-convert",
         f"/var/tmp/{meta['id']}.epub",

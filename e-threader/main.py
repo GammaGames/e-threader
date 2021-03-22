@@ -181,12 +181,13 @@ async def on_message(m):
             # Store messages in textchannel
             if isinstance(m.channel, discord.channel.TextChannel):
                 g = m.guild
+                user = await get_model(User, id=u.id, name=u.name)
                 guild = await get_model(Guild, id=g.id, name=g.name)
                 channel = await get_model(TextChannel, id=c.id, name=c.name, g=guild)
                 message = await get_model(Message, id=m.id, content=m.content, user=user, channel=channel)
                 # Don't do anything for text channel messages
             # Parse incoming requests
-            if isinstance(m.channel, discord.channel.DMChannel):
+            if isinstance(m.channel, discord.channel.DMChannel) and User.exists(id=u.id):
                 channel = await get_model(DmChannel, id=c.id, user=user)
                 message = await get_model(Message, id=m.id, content=m.content, channel=channel)
                 await process_dm(u, c, m)

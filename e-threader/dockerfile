@@ -1,9 +1,18 @@
-FROM python:3-slim-buster
+FROM python:3-slim
 
 ADD requirements.txt /opt/requirements.txt
 
-RUN apt-get update \
-    && apt-get install -y calibre libxml2-dev libxslt-dev python-dev gcc \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        calibre \
+        python3-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libxslt-dev \
+        libyajl2 \
+        gcc \
+        libz-dev \
+        libc-dev \
     && pip install -r /opt/requirements.txt
 
-# CMD ["python", "/opt/e-threader/main.py"]
+CMD ["python", "/opt/e-threader/main.py"]
