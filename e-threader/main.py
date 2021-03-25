@@ -114,7 +114,7 @@ Commands:
     - `?help`: Print this text
                     """)
             if not text.startswith("?") or text.startswith("?thread"):
-                match = re.search(r"(?:\?thread\s+)?<?(?P<url>https:\/\/www.(?:old\.)?reddit\.com[^\s]+)>?$", text)
+                match = re.search(r"(?:\?thread\s+)?<?(?P<url>https:\/\/(?:www\.)?(?:old\.)?reddit\.com[^\s]+)>?$", text)
                 if match is not None:
                     url = match.group("url")
                     await m.add_reaction(SEEN_REACT)
