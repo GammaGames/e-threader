@@ -13,7 +13,7 @@ I used a discord bot because it's easy to send a link with iOS's built-in share 
 
 1. Copy `.env.example` and fill in your own settings
 2. Create empty sqlite file with `touch db.sqlite`
-3. Start with `docker-compose up --build`
+3. Start with `docker-compose up --build` (will take a WHILE to build, especially on a raspi)
 4. React to "🙋" message in discord server
 5. Set up account
 6. DM bot to send books to kindle
