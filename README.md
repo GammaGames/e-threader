@@ -2,6 +2,8 @@
 
 Send reddit threads to a kindle via a discord bot
 
+![preview](preview.gif)
+
 ### How to use
 
 1. Copy `.env.example` and fill in your own settings
