@@ -170,7 +170,7 @@ Commands:
                         )
                         await m.add_reaction(SENT_REACT)
                         await m.add_reaction(COMPLETE_REACT)
-                        await send_log(f"Thread complete: {user.name}, <{url}>")
+                        await send_log(f"Serial complete: {user.name}, <{url}>")
 
 
 @client.event
