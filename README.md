@@ -5,10 +5,11 @@ Send reddit threads to a kindle via a discord bot
 ### How to use
 
 1. Copy `.env.example` and fill in your own settings
-2. Start with `docker-compose up --build`
-3. React to "🙋" message in discord server
-4. Set up account
-5. DM bot to send books to kindle
+2. Create empty sqlite file with `touch db.sqlite`
+3. Start with `docker-compose up --build`
+4. React to "🙋" message in discord server
+5. Set up account
+6. DM bot to send books to kindle
 
 ### Commands
 

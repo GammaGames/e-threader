@@ -18,6 +18,7 @@ SENT_REACT = "📬"
 COMPLETE_REACT = "✔️"
 ERROR_REACT = "❌"
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+GMAIL_USERNAME = client_secret=os.getenv("GMAIL_USERNAME")
 client = discord.Client()
 
 _print = print
@@ -92,8 +93,10 @@ async def process_dm(u, c, m):
 Signed up with email: "{user.email}"
 Please add us to your approved document email list:
 1. Go to "Manage Your Kindle": https://www.amazon.com/myk
-2. Under "Approved Personal Document E-mail List" add a new email address
-3. Enter "ethreader.bot@gmail.com"
+2. Under "Approved Personal Document E-mail List" add the following address:
+""")
+                    await u.send(GMAIL_USERNAME)
+                    await u.send(f"""
 Commands:
     - `?email [EMAIL]`: Set user email
     - `[LINK]`: Send reddit thread to your email as an e-book (default command)
@@ -111,11 +114,9 @@ Commands:
     - `?thread [LINK]`: Send reddit thread to your email as an e-book
     - `?serial [LINK]`: Send links from reddit thread/wiki to your email as an e-book
     - `?help`: Print this text
-
-To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/home/content/pdocs/dateDsc/
                     """)
             if not text.startswith("?") or text.startswith("?thread"):
-                match = re.search(r"(?:\?thread\s+)?<?(?P<url>https:\/\/www.(?:old\.)?reddit\.com[^\s]+)>?$", text)
+                match = re.search(r"(?:\?thread\s+)?<?(?P<url>https:\/\/(?:www\.)?(?:old\.)?reddit\.com[^\s]+)>?$", text)
                 if match is not None:
                     url = match.group("url")
                     await m.add_reaction(SEEN_REACT)
@@ -240,7 +241,7 @@ async def on_raw_reaction_add(payload):
             if react == SIGNUP_REACT and TextChannel.exists(id=payload.channel_id, name=SIGNUP_CHANNEL) and not user.email:
                 await init_signup(u)
             # Signup confirmation
-            elif react == CONFIRM_REACT and DmChannel.exists(id=payload.channel_id, name=SIGNUP_CHANNEL):
+            elif react == CONFIRM_REACT and DmChannel.exists(id=payload.channel_id):
                 await confirm_signup(u)
 
 
