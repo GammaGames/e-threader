@@ -20,10 +20,8 @@ async def setup():
     return me
 
 
-async def get_post_id(url):
-    match = re.search(r".*reddit.com\/(?:r\/\w+\/)?(?:comments\/)?(?P<url>\w+)", url)
-    if match is not None:
-        return match.group("url")
+def get_post_id(url):
+    return praw.models.Submission.id_from_url(url)
 
 
 async def get_post(id):
@@ -33,17 +31,19 @@ async def get_post(id):
     return {
         "id": submission.id,
         "title": submission.title,
+        "author": submission.author.name,
         "subreddit": submission.subreddit.display_name
     }
 
 
-async def render_post(id):
+async def render_post(id, template="thread_post.html"):
     global reddit
-    template = env.get_template("post.html")
+    template = env.get_template(template)
     submission = await reddit.submission(id=id)
     return {
         "submission": submission,
         "author": submission.author.name,
+        "title": submission.title,
         "body": template.render(
             author=submission.author.name,
             title=submission.title,
@@ -54,7 +54,7 @@ async def render_post(id):
 
 async def render_comments(id):
     global reddit
-    template = env.get_template("comment.html")
+    template = env.get_template("thread_comment.html")
     submission = await reddit.submission(id=id)
     submission.comment_sort = "old"
     comments = await submission.comments()
@@ -69,3 +69,21 @@ async def render_comments(id):
         } for c in await comments.list()
         if c.parent_id.startswith("t3") and c.author.name != "AutoModerator"
     ]
+
+
+async def get_post_text(id):
+    global reddit
+    submission = await reddit.submission(id=id)
+    return submission.selftext
+
+
+async def get_wiki_text(subreddit, wiki):
+    global reddit
+    sub = await reddit.subreddit(subreddit)
+    await sub.load()
+    page = await sub.wiki.get_page(wiki)
+    return page.content_md
+
+
+def scrape_post_ids(text):
+    return [get_post_id(x.group()) for x in re.finditer(r"(https:\/\/www.(?:old\.)?reddit\.com[^\s]+)", text)]

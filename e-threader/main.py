@@ -14,7 +14,7 @@ CONFIRM_REACT = "✔️"
 SEEN_REACT = "👀"
 FETCHED_REACT = "⬆️"
 RENDERED_REACT = "📖"
-SENT_REACT = "📨"
+SENT_REACT = "📬"
 COMPLETE_REACT = "✔️"
 ERROR_REACT = "❌"
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -98,6 +98,7 @@ Commands:
     - `?email [EMAIL]`: Set user email
     - `[LINK]`: Send reddit thread to your email as an e-book (default command)
     - `?thread [LINK]`: Send reddit thread to your email as an e-book
+    - `?serial [LINK]`: Send links from reddit thread/wiki to your email as an e-book
     - `?help`: Print help text
 
 To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/home/content/pdocs/dateDsc/
@@ -108,6 +109,7 @@ Commands:
     - `?email [EMAIL]`: Set user email
     - `[LINK]`: Send reddit thread to your email as an e-book (default command)
     - `?thread [LINK]`: Send reddit thread to your email as an e-book
+    - `?serial [LINK]`: Send links from reddit thread/wiki to your email as an e-book
     - `?help`: Print this text
 
 To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/home/content/pdocs/dateDsc/
@@ -118,12 +120,12 @@ To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/
                     url = match.group("url")
                     await m.add_reaction(SEEN_REACT)
                     await send_log(f"Thread received: {user.name}, <{url}>")
-                    id = await reddit.get_post_id(url)
+                    id = reddit.get_post_id(url)
                     meta = await reddit.get_post(id)
                     post = await reddit.render_post(id)
                     comments = await reddit.render_comments(id)
                     await m.add_reaction(FETCHED_REACT)
-                    filename = await ebook.create_book(meta, post, comments)
+                    filename = ebook.create_book_from_thread(meta, post, comments)
                     await m.add_reaction(RENDERED_REACT)
                     await mail.send_mail(
                         [user.email],
@@ -138,12 +140,44 @@ To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/
                     await m.add_reaction(ERROR_REACT)
                     await send_log(f"Message error: {user.name}, >{text}")
 
+            if text.startswith("?serial"):
+                match = re.search(r"(?:\?serial\s+)?<?(?P<url>https:\/\/www.(?:old\.)?reddit\.com[^\s]+)>?$", text)
+                if match is not None:
+                    url = match.group("url")
+                    print(url)
+                    await m.add_reaction(SEEN_REACT)
+                    await send_log(f"Serial received: {user.name}, <{url}>")
+                    wiki_match = re.search(r"reddit\.com\/r\/(?P<subreddit>\w+)\/wiki\/(?P<page>\w+)$", text)
+                    text = await reddit.get_wiki_text(
+                        wiki_match.group("subreddit"), wiki_match.group("page")
+                    ) if wiki_match is not None else await reddit.get_post_text(reddit.get_post_id(url))
+                    ids = reddit.scrape_post_ids(text)
+                    if len(ids):
+                        meta = await reddit.get_post(ids[0])
+                        await m.add_reaction(FETCHED_REACT)
+                        posts = [
+                            await reddit.render_post(id, template="serial_post.html")
+                            for id in ids
+                        ]
+                        filename = ebook.create_book_from_serial(meta, posts)
+                        await m.add_reaction(RENDERED_REACT)
+                        await mail.send_mail(
+                            [user.email],
+                            meta["title"],
+                            "Here is your epub file!",
+                            [filename]
+                        )
+                        await m.add_reaction(SENT_REACT)
+                        await m.add_reaction(COMPLETE_REACT)
+                        await send_log(f"Thread complete: {user.name}, <{url}>")
+
 
 @client.event
 async def on_ready():
     await client.change_presence(status=discord.Status.online)
     await send_log(f"Discord connected: {client.user}")
     reddit_user = await reddit.setup()
+
     await send_log(f"Reddit connected: {reddit_user}")
     with db_session():
         # print(client.private_channels)

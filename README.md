@@ -2,9 +2,20 @@
 
 Send reddit threads to a kindle via a discord bot
 
+### How to use
 
-TODO:
+1. Copy `.env.example` and fill in your own settings
+2. Start with `docker-compose up --build`
+3. React to "🙋" message in discord server
+4. Set up account
+5. DM bot to send books to kindle
 
-* Add covers (from unsplash?)
-* Better logging
-* Add to pi
+### Commands
+
+- `?email [EMAIL]`: Set user email
+- `[LINK]`: Send reddit thread to your email as an e-book (default command)
+- `?thread [LINK]`: Send reddit thread to your email as an e-book
+- `?collect [LINK]`: Send links from reddit thread/wiki to your email as an e-book
+- `?help`: Print help text
+
+God help you if you try to look into this code, it's held together with duct-tape and dreams. 
