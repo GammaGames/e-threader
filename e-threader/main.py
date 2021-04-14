@@ -19,6 +19,14 @@ COMPLETE_REACT = "✔️"
 ERROR_REACT = "❌"
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GMAIL_USERNAME = client_secret=os.getenv("GMAIL_USERNAME")
+HELP_TEXT = """
+Commands:
+    - `?email [EMAIL]`: Set user email
+    - `[LINK]`: Send reddit thread to your email as an e-book (default command)
+    - `?thread [LINK]`: Send reddit thread to your email as an e-book
+    - `?serial [LINK]`: Send links from reddit thread/wiki to your email as an e-book
+    - `?help`: Print this text
+"""
 client = discord.Client()
 
 _print = print
@@ -96,25 +104,10 @@ Please add us to your approved document email list:
 2. Under "Approved Personal Document E-mail List" add the following address:
 """)
                     await u.send(GMAIL_USERNAME)
-                    await u.send(f"""
-Commands:
-    - `?email [EMAIL]`: Set user email
-    - `[LINK]`: Send reddit thread to your email as an e-book (default command)
-    - `?thread [LINK]`: Send reddit thread to your email as an e-book
-    - `?serial [LINK]`: Send links from reddit thread/wiki to your email as an e-book
-    - `?help`: Print help text
-
-To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/home/content/pdocs/dateDsc/
-                    """)
+                    await u.send("To remove books from your Kindle, visit https://www.amazon.com/mn/dcw/myx.html#/home/content/pdocs/dateDsc/")
+                    await u.send(HELP_TEXT)
             if text.startswith("?help"):
-                    await u.send("""
-Commands:
-    - `?email [EMAIL]`: Set user email
-    - `[LINK]`: Send reddit thread to your email as an e-book (default command)
-    - `?thread [LINK]`: Send reddit thread to your email as an e-book
-    - `?serial [LINK]`: Send links from reddit thread/wiki to your email as an e-book
-    - `?help`: Print this text
-                    """)
+                    await u.send(HELP_TEXT)
             if not text.startswith("?") or text.startswith("?thread"):
                 match = re.search(r"(?:\?thread\s+)?<?(?P<url>https:\/\/(?:www\.)?(?:old\.)?reddit\.com[^\s]+)>?$", text)
                 if match is not None:

@@ -4,6 +4,11 @@ Send reddit threads to a kindle via a discord bot
 
 ![preview](preview.gif)
 
+### ... Why?
+
+Reading on a screen sucks, but reading on an e-reader is pretty alright. I want to read more from the r/WritingPrompts and r/ShortStories communities, so I threw this together.  
+I used a discord bot because it's easy to send a link with iOS's built-in share menu.
+
 ### How to use
 
 1. Copy `.env.example` and fill in your own settings
