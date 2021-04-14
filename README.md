@@ -23,7 +23,7 @@ I used a discord bot because it's easy to send a link with iOS's built-in share 
 - `?email [EMAIL]`: Set user email
 - `[LINK]`: Send reddit thread to your email as an e-book (default command)
 - `?thread [LINK]`: Send reddit thread to your email as an e-book
-- `?collect [LINK]`: Send links from reddit thread/wiki to your email as an e-book
+- `?serial [LINK]`: Send links from reddit thread/wiki to your email as an e-book
 - `?help`: Print help text
 
 God help you if you try to look into this code, it's held together with duct-tape and dreams. 
