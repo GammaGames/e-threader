@@ -189,10 +189,9 @@ async def on_ready():
                         for react in m.reactions:
                             if react.emoji == SIGNUP_REACT:
                                 async for u in react.users():
-                                    if filter_user(u):
-                                        user = await get_model(User, id=u.id, name=u.name)
-                                        if not user.email:
-                                            await init_signup(u)
+                                    user = await get_model(User, id=u.id, name=u.name)
+                                    if filter_user(u) and not user.email:
+                                        await init_signup(u)
 
                     # Add sign-up message
                     else:
